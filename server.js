@@ -1,8 +1,14 @@
 const 
-    http        = require('http'),
     querystring = require('querystring'),
+    http        = require('http'),
     
     hash        = require('./hash');
+
+function getFullUrl(protocol, host, url) {
+    protocol = typeof protocol !== 'undefined' ? 'https' : 'http';
+    
+    return `${protocol}://${host}${url}`;
+}
 
 function parse(data, type) {
     switch (type) {
@@ -22,11 +28,12 @@ function parse(data, type) {
     return data;
 }
 
-function handleError(res, code, message) {
+function handleError(res, code, error) {
     res.writeHead(code, { 'Content-Type': 'application/json' });
     res.write(
         JSON.stringify({
-            'error': message
+            name: error.name,
+            message: error.message
         })
     );
 }
@@ -55,7 +62,7 @@ function end(data, req, res) {
             res.end();
         });
     } catch (error) {
-        handleError(res, 200, error.message);
+        handleError(res, 200, error);
         res.end();
     }
 }
@@ -71,11 +78,17 @@ function handler(req, res) {
                 end(data, req, res);
             });
         } else {
-            handleError(res, 405, 'Method not allowed');
+            handleError(res, 405, { name: 'Client error', message: 'Method not allowed' });
             res.end();
         }
     } else {
-        handleError(res, 404, `${req.url} not found`);
+        let fullUrl = getFullUrl(
+            req.socket.encrypted,
+            req.headers.host,
+            req.url
+        );
+        
+        handleError(res, 404, { name: 'Client error', message: `${fullUrl} not found` });
         res.end();
     }
 }

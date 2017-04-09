@@ -9,23 +9,27 @@ let options = {
     }
 };
 
+function checkParam(param) {
+    return typeof param !== 'undefined';
+}
+
 function response(request) {
     return new Promise((resolve, reject) => {
         request.on('response', response => {
+            let data = '';
+            
             if (response.statusCode !== 200) {
                 return reject({
                     code: response.statusCode,
                     error: response.statusMessage
                 });
             }
-            
-            let data = '';
 
-            response.on('data', function (chunk) {
+            response.on('data', chunk => {
                 data += chunk;
             });
 
-            response.on('end', function () {
+            response.on('end', () => {
                 resolve(data);
             });
         });
@@ -34,16 +38,25 @@ function response(request) {
 
 module.exports = (data, callback) => {
     const request = http.request(options);
+    let   content = '';
     
-    data.firstname = typeof data.firstname !== 'undefined' ? data.firstname : '';
-    data.lastname = typeof data.lastname !== 'undefined' ? data.lastname : ''; 
+    if (checkParam(data.lastname)) {
+        data.lastname = data.lastname.trim();
+        
+        content = JSON.stringify({
+            lastName:  data.lastname
+        });
+        
+        request.setHeader(
+            'Content-Length',
+            Buffer.byteLength(content)
+        );
+    }
     
-    let content = JSON.stringify({
-        lastName:  data.lastname
-    });
-    
-    request.setHeader('Firstname',  data.firstname);
-    request.setHeader('Content-Length', Buffer.byteLength(content));
+    if (checkParam(data.firstname)) {
+        data.firstname = data.firstname.trim();
+        request.setHeader('Firstname',  data.firstname);
+    }
     
     request.write(content);
     request.end();
