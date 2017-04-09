@@ -56,9 +56,7 @@ function end(data, req, res) {
             );
             res.end();
         }).catch(error => {
-            res.write(
-                JSON.stringify(error)
-            );
+            handleError(res, error.code, { name: 'Error', message: error.message })
             res.end();
         });
     } catch (error) {

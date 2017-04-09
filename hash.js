@@ -21,7 +21,7 @@ function response(request) {
             if (response.statusCode !== 200) {
                 return reject({
                     code: response.statusCode,
-                    error: response.statusMessage
+                    message: response.statusMessage
                 });
             }
 
