@@ -1,8 +1,8 @@
 const 
-    http = require('http'),
+    http        = require('http'),
     querystring = require('querystring'),
     
-    api = require('./hash');
+    hash        = require('./hash');
 
 function parse(data, type) {
     switch (type) {
@@ -63,19 +63,19 @@ function end(data, req, res) {
 function handler(req, res) {
     let data = '';
     
-    if (req.method === 'POST') {
-        if (req.url === '/') {
+    if (req.url === '/') {
+        if (req.method === 'POST') {
             req.on('data', chunk => data += chunk);
             
             req.on('end', () => {
                 end(data, req, res);
             });
         } else {
-            handleError(res, 404, `${req.url} not found`);
+            handleError(res, 405, 'Method not allowed');
             res.end();
         }
     } else {
-        handleError(res, 405, 'Method not allowed');
+        handleError(res, 404, `${req.url} not found`);
         res.end();
     }
 }

@@ -3,7 +3,6 @@ const http = require('http');
 let options = {
     hostname: 'netology.tomilomark.ru',
     path: '/api/v1/hash',
-    port: 80,
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
@@ -17,7 +16,7 @@ function response(request) {
                 return reject({
                     code: response.statusCode,
                     error: response.statusMessage
-                })
+                });
             }
             
             let data = '';
